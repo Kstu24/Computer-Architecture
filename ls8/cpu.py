@@ -2,7 +2,7 @@
 HLT = 0b00000001
 PRN = 0b01000111
 LDI = 0b10000010
-
+MUL = 0b10100010
 
 import sys
 
@@ -23,26 +23,26 @@ class CPU:
     def ram_write(self, address, new_value):
         self.ram[address] = new_value
 
-    def load(self):
+    def load(self, filename):
         """Load a program into memory."""
 
         address = 0
 
-        # For now, we've just hardcoded a program:
+        # open file
+        with open(filename) as my_file:
+            # go through each line to parse and get the instruction
+            for line in my_file:
+                # try to get instruction/operand in the line
+                comment_split = line.split('#')
+                maybe_binary_number = comment_split[0]
+                try:
+                    x = int(maybe_binary_number, 2)
+                    self.ram_write(x, address)
+                    address += 1
+                except:
+                    print("Error writing instruction")
 
-        program = [
-            # From print8.ls8
-            0b10000010, # LDI R0,8
-            0b00000000,
-            0b00001000,
-            0b01000111, # PRN R0
-            0b00000000,
-            0b00000001, # HLT
-        ]
 
-        for instruction in program:
-            self.ram[address] = instruction
-            address += 1
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -91,6 +91,9 @@ class CPU:
             self.pc += 2
         elif instruction == LDI:
             self.reg[operand_A] = operand_B
+            self.pc += 3
+        elif instruction == MUL:
+            self.reg[operand_A] *= self.reg[operand_B]
             self.pc += 3
         else:
             print("Invalid instruction")

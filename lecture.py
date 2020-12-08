@@ -62,3 +62,36 @@ while running:
     else:
         print(f"Unknown instruction {command_to_execute}")
         sys.exit(1)
+
+# Day 2
+a = 0b1001
+b = 0b0110
+
+c = a & b #0b0000
+d = a | b #0b1111
+e = a ^ b #0b1111
+print(format(e, '04b'))
+
+# Meanings of the bits in the first byte of each instruction: `AABCDDDD`
+
+# * `AA` Number of operands for this opcode, 0-2
+
+INSTRUCTION = 0b10000010 # >> 6 --> 0b100001 & 0b001100 --> 0b10
+PC = 0
+number_of_times_to_increment_pc =  ((INSTRUCTION >> 6) & 0b11) + 1
+PC += number_of_times_to_increment_pc
+
+try:
+    with open(sys.argv[1]) as my_file:
+        for line in my_file:
+            comment_split = line.split("#")
+            maybe_binary_number = comment_split[0]
+
+            try:
+                x = int(maybe_binary_number, 2)
+                print("{:08b}: {:d}".format(x, x))
+            except:
+                print(f"failed to cast {maybe_binary_number} to an int")
+                continue
+except FileNotFoundError:
+    print("file not found...")
