@@ -1,8 +1,11 @@
 """CPU functionality."""
-HLT = 0b00000001
-PRN = 0b01000111
-LDI = 0b10000010
-MUL = 0b10100010
+SP = 7 # Stack Pointer 
+HLT = 0b00000001 # Halt
+PRN = 0b01000111 # Print
+LDI = 0b10000010 # Load Immediate
+MUL = 0b10100010 # Multiply
+PUSH = 0b01000101 # Push
+POP = 0b01000110 # Pop
 
 import sys
 
@@ -13,7 +16,7 @@ class CPU:
         """Construct a new CPU."""
         self.reg = [0] * 8
         self.ram = [0] * 256
-        self.reg[7] = 0xF4
+        self.reg[SP] = 0xF4
         self.pc = 0
         self.halted = False
 
@@ -41,8 +44,6 @@ class CPU:
                     address += 1
                 except:
                     print("Error writing instruction")
-
-
 
     def alu(self, op, reg_a, reg_b):
         """ALU operations."""
@@ -95,5 +96,24 @@ class CPU:
         elif instruction == MUL:
             self.reg[operand_A] *= self.reg[operand_B]
             self.pc += 3
+        elif instruction == PUSH:
+            # decrement stack pointer by 1
+            self.reg[SP] -= 1
+            # gather register number for push
+            reg_number = self.ram_read(self.pc + 1)
+            # make value equal to register number where stack pointer is
+            reg_value = self.reg[reg_number]
+            # address is equal to register stack pointer
+            address = self.reg[SP]
+            # put the value at the given address
+            self.ram[address] = reg_value
+            self.pc += 2
+        elif instruction == POP:
+            number_to_pop_in = self.ram_read(self.pc + 1)
+            address = self.reg[SP]
+            pop_value = self.reg[number_to_pop_in]
+            self.reg[number_to_pop_in] = pop_value
+            self.reg[SP] += 1
+            self.pc += 2
         else:
             print("Invalid instruction")
